@@ -33,11 +33,7 @@ func (mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	h, pattern := serveMux.Handler(r)
 	// modify r url and cut out the matched pattern
-	// fmt.Printf("aaaa %+v\n", pattern)
-
 	trimPrefixFromURL(r.URL, pattern)
-	// fmt.Printf("aaaa %+v\n", r.URL)
-
 	h.ServeHTTP(w, r)
 }
 
@@ -52,14 +48,10 @@ func GetMainMux() http.Handler {
 	return mainHandler{}
 }
 
-func SignUp(name string) *Info {
+func Group(name string) *Info {
 	ret := new(Info)
 	ret.mux = serveMux
 	return ret
-}
-
-func (i *Info) Handle(path string, f func(w http.ResponseWriter, r *http.Request, e *ExtendedInfo)) {
-
 }
 
 func (i *Info) HandleFunc(path string, f func(w http.ResponseWriter, r *http.Request)) {

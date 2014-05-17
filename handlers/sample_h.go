@@ -3,13 +3,16 @@ package handlers
 import (
 	"../registry"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 )
 
 func init() {
-	reg := registry.SignUp("sample_h")
-	reg.Handle("/api", sampleApi)
+	reg := registry.Group("sample_h")
+	reg.HandleFunc("/api/", sampleApi)
 }
 
-func sampleApi(w http.ResponseWriter, r *http.Request, e *registry.ExtendedInfo) {
-
+func sampleApi(w http.ResponseWriter, r *http.Request) {
+	u, _ := url.Parse("https://google.pl")
+	httputil.NewSingleHostReverseProxy(u).ServeHTTP(w, r)
 }
