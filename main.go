@@ -5,7 +5,7 @@ import (
 
 	_ "./handlers"
 	//"fmt"
-	// "net/http"
+	"net/http"
 	// "net/http/httputil"
 	// "net/url"
 )
@@ -18,7 +18,7 @@ import (
 func main() {
 	//	url, _ := url.Parse("https://www.google.com")
 
-	http.ListenAndServe("0.0.0.0:8080", registry.GetMainHandler())
+	http.ListenAndServe("0.0.0.0:8080", registry.GetMainMux())
 }
 
 /*
