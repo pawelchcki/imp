@@ -16,12 +16,14 @@ type ExtendedInfo struct {
 }
 
 type Info struct {
-	mux *http.ServeMux
+	mux       *http.ServeMux
+	groupName string
 }
 
 type mainHandler struct{}
 
 var serveMux *http.ServeMux = http.NewServeMux()
+var groupMap map[string]*Info = make(map[string]*Info)
 
 func (mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI == "*" {
@@ -34,6 +36,7 @@ func (mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h, pattern := serveMux.Handler(r)
 	// modify r url and cut out the matched pattern
 	trimPrefixFromURL(r.URL, pattern)
+
 	h.ServeHTTP(w, r)
 }
 
@@ -51,9 +54,14 @@ func GetMainMux() http.Handler {
 func Group(name string) *Info {
 	ret := new(Info)
 	ret.mux = serveMux
+	ret.groupName = name
 	return ret
 }
 
 func (i *Info) HandleFunc(path string, f func(w http.ResponseWriter, r *http.Request)) {
+	if _, ok := groupMap[path]; ok == true {
+		panic("path duplicated: " + path)
+	}
+	groupMap[path] = i
 	i.mux.HandleFunc(path, f)
 }

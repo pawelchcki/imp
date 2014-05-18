@@ -37,7 +37,7 @@ func BenchmarkUrlTrimming(b *testing.B) {
 
 func TestHandlerRun(t *testing.T) {
 	// x := GetMainMux()
-	i := SignUp("test")
+	i := Group("test")
 
 	didRun := false
 
@@ -57,4 +57,16 @@ func TestHandlerRun(t *testing.T) {
 	if !didRun {
 		t.Fatal("handler wasn't run")
 	}
+}
+func TestFailToAddSameRouteTwice(t *testing.T) {
+	i := Group("test")
+	i.HandleFunc("/a", func(w http.ResponseWriter, r *http.Request) {})
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fail()
+		}
+	}()
+
+	i.HandleFunc("/a", func(w http.ResponseWriter, r *http.Request) {})
 }
