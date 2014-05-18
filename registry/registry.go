@@ -1,6 +1,8 @@
 package registry
 
 import (
+	log "../nlog"
+
 	"fmt"
 	"net/http"
 	"net/url"
@@ -37,6 +39,7 @@ func (mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// modify r url and cut out the matched pattern
 	trimPrefixFromURL(r.URL, pattern)
 
+	log.Debug("info")
 	h.ServeHTTP(w, r)
 }
 

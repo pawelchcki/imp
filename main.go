@@ -4,7 +4,8 @@ import (
 	"./registry"
 
 	_ "./handlers"
-	//"fmt"
+	log "./nlog"
+	"fmt"
 	"net/http"
 	// "net/http/httputil"
 	// "net/url"
@@ -17,8 +18,11 @@ import (
 
 func main() {
 	//	url, _ := url.Parse("https://www.google.com")
-
-	http.ListenAndServe("0.0.0.0:8080", registry.GetMainMux())
+	ip := "0.0.0.0"
+	port := 8080
+	ip_port := fmt.Sprintf("%s:%d", ip, port)
+	log.Infof("Listening on %s", ip_port)
+	http.ListenAndServe(ip_port, registry.GetMainMux())
 }
 
 /*
