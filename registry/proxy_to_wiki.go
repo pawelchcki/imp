@@ -5,10 +5,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"../nlog"
 )
 
 const WikiaNameQueryParam = "wikianame"
 const WikiaLangQueryParam = "wikialang"
+const DefaultWikiaName = "www"
 
 func singleJoiningSlash(a, b string) string {
 	aslash := strings.HasSuffix(a, "/")
@@ -22,12 +25,12 @@ func singleJoiningSlash(a, b string) string {
 	return a + b
 }
 
-func defaultWikiBaseUrl(wikiaName, wikiLang string) *url.URL {
+func defaultWikiBaseUrl(wikiaName, wikiaLang string) *url.URL {
 	u := new(url.URL)
 	baseHost := "wikia.com"
 	u.Scheme = "http"
-	if wikiLang != "en" {
-		u.Host = wikiLang + "." + wikiaName + "." + baseHost
+	if wikiaLang != "en" && wikiaLang != "" {
+		u.Host = wikiaLang + "." + wikiaName + "." + baseHost
 	} else {
 		u.Host = wikiaName + "." + baseHost
 	}
@@ -44,6 +47,8 @@ func defaultWikiProxyDirector(wikiBaseUrl func(wikiaName, wikiaLang string) *url
 		wikiaName := query.Get(WikiaNameQueryParam)
 		if wikiaName != "" {
 			query.Del(WikiaNameQueryParam)
+		} else {
+			wikiaName = DefaultWikiaName
 		}
 		wikiaLang := query.Get(WikiaLangQueryParam)
 		if wikiaLang != "" {
@@ -55,7 +60,10 @@ func defaultWikiProxyDirector(wikiBaseUrl func(wikiaName, wikiaLang string) *url
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
+		req.Host = target.Host
 		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
+		nlog.Debugf("default wiki request: %+v", req)
+
 		if target.RawQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = target.RawQuery + req.URL.RawQuery
 		} else {

@@ -1,20 +1,27 @@
 package handlers
 
 import (
+	"../mwchain"
 	"../registry"
-	// "net/http"
-	"net/http/httputil"
-	"net/url"
+
+	// "net/http/httputil"
+	// "net/url"
 )
 
 func init() {
 	reg := registry.Group("sample_h")
-	u, _ := url.Parse("https://google.pl")
+	// u, _ := url.Parse("https://google.pl")
 
-	reg.HandleFunc("/api/", httputil.NewSingleHostReverseProxy(u).ServeHTTP)
+	c := mwchain.NewChain()
+	c.Then(registry.VerifyToken)
+	c.HandleFunc(registry.DefaultWikiProxy().ServeHTTP)
+	reg.HandleFunc("/api/", c.ServeHTTP)
+
+	// httputil.NewSingleHostReverseProxy(u).ServeHTTP(/w, r)
+
 }
 
 // func sampleApi(w http.ResponseWriter, r *http.Request) {
 
-// 	httputil.NewSingleHostReverseProxy(u).ServeHTTP(w, r)
+// 	httputil.NewSingleHostReverseProxy(u).ServeHTTP(/w, r)
 // }
