@@ -12,8 +12,3 @@ func init() {
 	c.Then(mw.VerifyToken)
 	c.HandleFunc(mw.DefaultWikiProxy())
 }
-
-// func sampleApi(w http.ResponseWriter, r *http.Request) {
-
-// 	httputil.NewSingleHostReverseProxy(u).ServeHTTP(/w, r)
-// }
