@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"../mwutils"
 	log "../nlog"
 
 	"fmt"
@@ -59,6 +60,12 @@ func Group(name string) *Info {
 	ret.mux = serveMux
 	ret.groupName = name
 	return ret
+}
+
+func (i *Info) HandleNewChain(path string) *mwutils.Chain {
+	c := new(mwutils.Chain)
+	i.HandleFunc(path, c.ServeHTTP)
+	return c
 }
 
 func (i *Info) HandleFunc(path string, f func(w http.ResponseWriter, r *http.Request)) {
