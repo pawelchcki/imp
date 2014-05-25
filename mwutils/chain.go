@@ -37,7 +37,7 @@ func (c *Chain) HandleFunc(f func(con *Connection)) *Chain {
 
 func (c *Chain) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	brokenChain := false
-	connection := &Connection{w, r, nil}
+	connection := &Connection{w, r, ConnectionMetadata{}}
 	for _, mw := range c.mws {
 		if mw(connection) == false {
 			brokenChain = true

@@ -5,7 +5,7 @@ import (
 )
 
 type Connection struct {
-	ResponseWriter     http.ResponseWriter
-	Request            *http.Request
-	ConnectionMetadata *interface{}
+	ResponseWriter http.ResponseWriter
+	Request        *http.Request
+	Metadata       ConnectionMetadata
 }

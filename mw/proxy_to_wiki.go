@@ -9,9 +9,9 @@ import (
 	"../nlog"
 )
 
+const DefaultWikiaName = "www"
 const WikiaNameQueryParam = "wikianame"
 const WikiaLangQueryParam = "wikialang"
-const DefaultWikiaName = "www"
 
 func singleJoiningSlash(a, b string) string {
 	aslash := strings.HasSuffix(a, "/")
