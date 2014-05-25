@@ -11,14 +11,14 @@ func TestChainAllRun(t *testing.T) {
 	aRun := false
 	bRun := false
 	cRun := false
-	c.Then(func(w http.ResponseWriter, r *http.Request) bool {
+	c.Then(func(con *Connection) bool {
 		aRun = true
 		return true
-	}).Then(func(w http.ResponseWriter, r *http.Request) bool {
+	}).Then(func(con *Connection) bool {
 		bRun = true
 		return true
 	})
-	c.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
+	c.HandleFunc(func(con *Connection) {
 		cRun = true
 	})
 
@@ -33,14 +33,14 @@ func TestChainSomeCausedChainBreak(t *testing.T) {
 	aRun := false
 	bRun := false
 	cRun := false
-	c.Then(func(w http.ResponseWriter, r *http.Request) bool {
+	c.Then(func(con *Connection) bool {
 		aRun = true
 		return true
-	}).Then(func(w http.ResponseWriter, r *http.Request) bool {
+	}).Then(func(con *Connection) bool {
 		bRun = true
 		return false
 	})
-	c.HandleFunc(func(w http.ResponseWriter, r *http.Request) {
+	c.HandleFunc(func(con *Connection) {
 		cRun = true
 	})
 
