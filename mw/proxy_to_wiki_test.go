@@ -4,8 +4,8 @@ import (
 	// "io/ioutil"
 	// // "fmt"
 
+	"../mwutils"
 	"net/http"
-	// "net/http/httptest"
 	"net/url"
 	"testing"
 )
@@ -29,9 +29,19 @@ func TestSampleWikiUrl(t *testing.T) {
 }
 
 func TestWikiProxyDirector(t *testing.T) {
-	proxyDirector := defaultWikiProxyDirector(defaultWikiBaseUrl)
+	con := &mwutils.Connection{}
 	sampleUrl, _ := url.Parse("http://this.api.call.endpoint/api/v1/based/query?wikianame=muppet&wikialang=pl")
 	req := http.Request{Method: "GET", URL: sampleUrl}
+
+	con.Request = &req
+	// con.TargetWikiaUrl, _ = url.Parse("pl.muppet")
+
+	WikiaDesignationQueryParser(con)
+	DefaultTargetWikiaURL(con)
+
+	mwutils.MapperSet(con)
+	proxyDirector := defaultWikiProxyDirector()
+
 	proxyDirector(&req)
 	if req.URL.Host != "pl.muppet.wikia.com" {
 		t.Fatal(req.URL.Host)

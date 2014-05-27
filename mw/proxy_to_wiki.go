@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"../mwutils"
 	"../nlog"
 )
 
@@ -38,25 +39,16 @@ func defaultWikiBaseUrl(wikiaName, wikiaLang string) *url.URL {
 }
 
 func WikiProxy(wikiBaseUrl func(wikiaName, wikiaLang string) *url.URL) *httputil.ReverseProxy {
-	return &httputil.ReverseProxy{Director: defaultWikiProxyDirector(wikiBaseUrl)}
+	return &httputil.ReverseProxy{Director: defaultWikiProxyDirector()}
 }
 
-func defaultWikiProxyDirector(wikiBaseUrl func(wikiaName, wikiaLang string) *url.URL) func(req *http.Request) {
+func defaultWikiProxyDirector() func(req *http.Request) {
 	return func(req *http.Request) {
-		query := req.URL.Query()
-		wikiaName := query.Get(WikiaNameQueryParam)
-		if wikiaName != "" {
-			query.Del(WikiaNameQueryParam)
-		} else {
-			wikiaName = DefaultWikiaName
+		con, ok := mwutils.MapperGetOk(req)
+		if ok == false {
+			panic("couldn't get connection object from global pool")
 		}
-		wikiaLang := query.Get(WikiaLangQueryParam)
-		if wikiaLang != "" {
-			query.Del(WikiaLangQueryParam)
-		}
-		req.URL.RawQuery = query.Encode()
-
-		target := wikiBaseUrl(wikiaName, wikiaLang)
+		target := con.Metadata.TargetWikiaUrl
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
@@ -70,6 +62,45 @@ func defaultWikiProxyDirector(wikiBaseUrl func(wikiaName, wikiaLang string) *url
 			req.URL.RawQuery = target.RawQuery + "&" + req.URL.RawQuery
 		}
 	}
+}
+
+func WikiaDesignationQueryParser(con *mwutils.Connection) bool {
+	query := con.Request.URL.Query()
+	wikiaName := query.Get(WikiaNameQueryParam)
+	if wikiaName != "" {
+		query.Del(WikiaNameQueryParam)
+	}
+	wikiaLang := query.Get(WikiaLangQueryParam)
+	if wikiaLang != "" {
+		query.Del(WikiaLangQueryParam)
+	}
+	con.Request.URL.RawQuery = query.Encode()
+
+	con.Metadata.Wikia = &mwutils.Wikia{wikiaName, wikiaLang}
+	return true
+}
+
+func DefaultTargetWikiaURL(con *mwutils.Connection) bool {
+	u := new(url.URL)
+	baseHost := "wikia.com"
+	u.Scheme = "http"
+	wikiaName := con.Metadata.Wikia.Name
+	wikiaLang := con.Metadata.Wikia.Lang
+
+	if wikiaName == "" {
+		wikiaName = "www"
+	}
+	if wikiaLang != "en" && wikiaLang != "" {
+		u.Host = wikiaLang + "." + wikiaName + "." + baseHost
+	} else {
+		u.Host = wikiaName + "." + baseHost
+	}
+	con.Metadata.TargetWikiaUrl = u
+	return true
+}
+
+func TWikiProxy(con *mwutils.Connection) bool {
+	return false
 }
 
 func DefaultWikiProxy() func(rw http.ResponseWriter, req *http.Request) {
