@@ -2,73 +2,88 @@ package nlog
 
 import (
 	"log"
+	"log/syslog"
 	"os"
 )
 
-var emergLogger, alertLogger, critLogger, errLogger, warningLogger, noticeLogger, infoLogger, debugLogger *log.Logger
-
 func init() {
-	useStandardLogging()
+	initializeStdOutLoggers()
 }
 
-func useStandardLogging() {
+var prioStringMap = map[syslog.Priority]string{
+	syslog.LOG_EMERG:   "EMERG",
+	syslog.LOG_ALERT:   "ALERT",
+	syslog.LOG_CRIT:    "CRIT",
+	syslog.LOG_ERR:     "ERR",
+	syslog.LOG_WARNING: "WARNING",
+	syslog.LOG_NOTICE:  "NOTICE",
+	syslog.LOG_INFO:    "INFO",
+	syslog.LOG_DEBUG:   "DEBUG",
+}
+
+var prioLoggers map[syslog.Priority]*log.Logger = make(map[syslog.Priority]*log.Logger)
+
+func initializeStdOutLoggers() {
 	flag := 0
-	emergLogger = log.New(os.Stdout, "EMERG ", flag)
-	alertLogger = log.New(os.Stdout, "ALERT ", flag)
-	critLogger = log.New(os.Stdout, "CRIT ", flag)
-	errLogger = log.New(os.Stdout, "ERR ", flag)
-	warningLogger = log.New(os.Stdout, "WARNING ", flag)
-	noticeLogger = log.New(os.Stdout, "NOTICE ", flag)
-	infoLogger = log.New(os.Stdout, "INFO ", flag)
-	debugLogger = log.New(os.Stdout, "DEBUG ", flag)
+	for prio, lvl := range prioStringMap {
+		prioLoggers[prio] = log.New(os.Stdout, lvl+" ", flag)
+	}
+}
+
+func levelPrintf(prio syslog.Priority, f string, v ...interface{}) {
+	prioLoggers[prio].Printf(f, v...)
+}
+
+func levelPrint(prio syslog.Priority, v ...interface{}) {
+	prioLoggers[prio].Print(v...)
 }
 
 func Emerg(v ...interface{}) {
-	emergLogger.Print(v...)
+	levelPrint(syslog.LOG_EMERG, v...)
 }
 func Alert(v ...interface{}) {
-	alertLogger.Print(v...)
+	levelPrint(syslog.LOG_ALERT, v...)
 }
 func Crit(v ...interface{}) {
-	critLogger.Print(v...)
+	levelPrint(syslog.LOG_CRIT, v...)
 }
 func Err(v ...interface{}) {
-	errLogger.Print(v...)
+	levelPrint(syslog.LOG_ERR, v...)
 }
 func Warning(v ...interface{}) {
-	warningLogger.Print(v...)
+	levelPrint(syslog.LOG_WARNING, v...)
 }
 func Notice(v ...interface{}) {
-	noticeLogger.Print(v...)
+	levelPrint(syslog.LOG_NOTICE, v...)
 }
 func Info(v ...interface{}) {
-	infoLogger.Print(v...)
+	levelPrint(syslog.LOG_INFO, v...)
 }
 func Debug(v ...interface{}) {
-	debugLogger.Print(v...)
+	levelPrint(syslog.LOG_DEBUG, v...)
 }
 
 func Emergf(f string, v ...interface{}) {
-	emergLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_EMERG, f, v...)
 }
 func Alertf(f string, v ...interface{}) {
-	alertLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_ALERT, f, v...)
 }
 func Critf(f string, v ...interface{}) {
-	critLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_CRIT, f, v...)
 }
 func Errf(f string, v ...interface{}) {
-	errLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_ERR, f, v...)
 }
 func Warningf(f string, v ...interface{}) {
-	warningLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_WARNING, f, v...)
 }
 func Noticef(f string, v ...interface{}) {
-	noticeLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_NOTICE, f, v...)
 }
 func Infof(f string, v ...interface{}) {
-	infoLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_INFO, f, v...)
 }
 func Debugf(f string, v ...interface{}) {
-	debugLogger.Printf(f, v...)
+	levelPrintf(syslog.LOG_DEBUG, f, v...)
 }
