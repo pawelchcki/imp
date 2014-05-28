@@ -19,22 +19,37 @@ func TestSingleJoiningSlash(t *testing.T) {
 	}
 }
 
-func TestSampleWikiUrl(t *testing.T) {
-	if defaultWikiBaseUrl("muppet", "en").String() != "http://muppet.wikia.com" {
+func TestWikiaDesignationQueryParser(t *testing.T) {
+	con := getFakeCon()
+	WikiaDesignationQueryParser(con)
+
+	if con.Metadata.Wikia.Name != "muppet" {
 		t.Fail()
 	}
-	if defaultWikiBaseUrl("muppet", "pl").String() != "http://pl.muppet.wikia.com" {
+	if con.Metadata.Wikia.Lang != "pl" {
 		t.Fail()
 	}
 }
 
-func TestWikiProxyDirector(t *testing.T) {
+func TestDefaultTargetWikiaURL(t *testing.T) {
+	con := getFakeCon()
+	WikiaDesignationQueryParser(con)
+	con.Metadata.Wikia.Lang = ""
+	DefaultTargetWikiaURL(con)
+	if con.Metadata.TargetWikiaUrl.String() != "http://muppet.wikia.com" {
+		t.Fatalf("%s != %s", con.Metadata.TargetWikiaUrl.String(), "http://muppet.wikia.com")
+	}
+}
+
+func getFakeCon() *mwutils.Connection {
 	con := &mwutils.Connection{}
 	sampleUrl, _ := url.Parse("http://this.api.call.endpoint/api/v1/based/query?wikianame=muppet&wikialang=pl")
-	req := http.Request{Method: "GET", URL: sampleUrl}
+	con.Request = &http.Request{Method: "GET", URL: sampleUrl}
+	return con
+}
 
-	con.Request = &req
-	// con.TargetWikiaUrl, _ = url.Parse("pl.muppet")
+func TestWikiProxyDirector(t *testing.T) {
+	con := getFakeCon()
 
 	WikiaDesignationQueryParser(con)
 	DefaultTargetWikiaURL(con)
@@ -42,15 +57,15 @@ func TestWikiProxyDirector(t *testing.T) {
 	mwutils.MapperSet(con)
 	proxyDirector := defaultWikiProxyDirector()
 
-	proxyDirector(&req)
-	if req.URL.Host != "pl.muppet.wikia.com" {
-		t.Fatal(req.URL.Host)
+	proxyDirector(con.Request)
+	if con.Request.URL.Host != "pl.muppet.wikia.com" {
+		t.Fatal(con.Request.URL.Host)
 	}
 
-	if req.URL.Path != "/api/v1/based/query" {
-		t.Fatal(req.URL.Path)
+	if con.Request.URL.Path != "/api/v1/based/query" {
+		t.Fatal(con.Request.URL.Path)
 	}
-	if req.URL.RawQuery != "" {
-		t.Fatal(req.URL.RawQuery)
+	if con.Request.URL.RawQuery != "" {
+		t.Fatal(con.Request.URL.RawQuery)
 	}
 }
