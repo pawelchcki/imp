@@ -3,11 +3,18 @@ package mw
 import (
 	"github.com/pchojnacki/intelligent_maybe_proxy/mwutils"
 	"net/http"
-	// "net/http/httputil"
-
+	"net/http/httptest"
 	"net/url"
 	"testing"
 )
+
+func getFakeCon() *mwutils.Connection {
+	con := &mwutils.Connection{}
+	sampleUrl, _ := url.Parse("http://this.api.call.endpoint/api/v1/based/query?wikianame=muppet&wikialang=pl")
+	con.Request = &http.Request{Method: "GET", URL: sampleUrl}
+	con.ResponseWriter = httptest.NewRecorder()
+	return con
+}
 
 func TestSingleJoiningSlash(t *testing.T) {
 	if singleJoiningSlash("a", "b") != "a/b" {
@@ -40,13 +47,6 @@ func TestDefaultTargetWikiaURL(t *testing.T) {
 	}
 }
 
-func getFakeCon() *mwutils.Connection {
-	con := &mwutils.Connection{}
-	sampleUrl, _ := url.Parse("http://this.api.call.endpoint/api/v1/based/query?wikianame=muppet&wikialang=pl")
-	con.Request = &http.Request{Method: "GET", URL: sampleUrl}
-	return con
-}
-
 func TestWikiProxyDirector(t *testing.T) {
 	con := getFakeCon()
 
@@ -54,9 +54,8 @@ func TestWikiProxyDirector(t *testing.T) {
 	DefaultTargetWikiaURL(con)
 
 	mwutils.MapperSet(con)
-	proxyDirector := defaultWikiProxyDirector()
+	DefaultWikiProxy()(con.ResponseWriter, con.Request)
 
-	proxyDirector(con.Request)
 	if con.Request.URL.Host != "pl.muppet.wikia.com" {
 		t.Fatal(con.Request.URL.Host)
 	}

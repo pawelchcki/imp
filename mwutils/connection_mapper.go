@@ -3,6 +3,7 @@ package mwutils
 import (
 	"github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -11,9 +12,10 @@ import (
 // to be used in 3rd party handler to access Connection Object
 
 var (
-	mutex sync.RWMutex
-	data  = make(map[*http.Request]*Connection)
-	datat = make(map[*http.Request]int64)
+	mutex   sync.RWMutex
+	data    = make(map[*http.Request]*Connection)
+	dataUrl = make(map[*url.URL]*Connection)
+	datat   = make(map[*http.Request]int64)
 )
 
 func MapperSet(val *Connection) {
@@ -21,6 +23,7 @@ func MapperSet(val *Connection) {
 	r := val.Request
 	mutex.Lock()
 	data[r] = val
+	dataUrl[r.URL] = val
 	datat[r] = time.Now().Unix()
 	mutex.Unlock()
 }
@@ -35,6 +38,10 @@ func MapperGetOk(r *http.Request) (*Connection, bool) {
 
 	mutex.RLock()
 	value, ok := data[r]
+	// if request lookup fail, lookup using url pointer. This is workaround to use it in ReverseProxy director, because it copied Request object
+	if !ok && r.URL != nil {
+		value, ok = dataUrl[r.URL]
+	}
 	mutex.RUnlock()
 	return value, ok
 }
@@ -53,6 +60,7 @@ func MapperClear(r *http.Request) {
 func clear(r *http.Request) {
 	delete(data, r)
 	delete(datat, r)
+	delete(dataUrl, r.URL)
 }
 
 // Purge removes request data stored for longer than maxAge, in seconds.
@@ -70,6 +78,7 @@ func MapperPurge(maxAge int) int {
 	if maxAge <= 0 {
 		count = len(data)
 		data = make(map[*http.Request]*Connection)
+		dataUrl = make(map[*url.URL]*Connection)
 		datat = make(map[*http.Request]int64)
 	} else {
 		min := time.Now().Unix() - int64(maxAge)
