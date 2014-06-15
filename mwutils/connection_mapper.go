@@ -1,7 +1,7 @@
 package mwutils
 
 import (
-	"github.com/pchojnacki/intelligent_maybe_proxy/nlog"
+	// "github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 	"net/http"
 	"net/url"
 	"sync"
@@ -19,7 +19,6 @@ var (
 )
 
 func MapperSet(val *Connection) {
-	nlog.Debugf("Setting %p", val.Request)
 	r := val.Request
 	mutex.Lock()
 	data[r] = val
@@ -30,12 +29,6 @@ func MapperSet(val *Connection) {
 
 // GetOk returns stored value and presence state like multi-value return of map access.
 func MapperGetOk(r *http.Request) (*Connection, bool) {
-	for k, d := range data {
-		nlog.Debugf("Getting fromXXXX KEY: %p, DATA:%+v", k, d)
-
-	}
-	nlog.Debugf("Getting for %p", r)
-
 	mutex.RLock()
 	value, ok := data[r]
 	// if request lookup fail, lookup using url pointer. This is workaround to use it in ReverseProxy director, because it copied Request object

@@ -49,13 +49,16 @@ func defaultWikiProxyDirector() func(req *http.Request) {
 		if ok == false {
 			panic("couldn't get connection object from global pool")
 		}
+
 		target := con.Metadata.TargetWikiaUrl
+		if target == nil {
+			panic("ReverseProxy target url not present")
+		}
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		req.Host = target.Host
 		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
-		nlog.Debugf("default wiki request: %+v", req)
 
 		if target.RawQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = target.RawQuery + req.URL.RawQuery

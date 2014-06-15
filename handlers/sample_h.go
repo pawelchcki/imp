@@ -11,6 +11,8 @@ func init() {
 	// u, _ := url.Parse("https://google.pl")
 	c := reg.HandleNewChain("/api/")
 	c.ThenSimple(mw.VerifyToken)
+	c.Then(mw.WikiaDesignationQueryParser)
+	c.Then(mw.DefaultTargetWikiaURL)
 	c.HandleFunc(mwutils.ConnectionMapperFuncWrapper(mw.DefaultWikiProxy()))
 
 }
