@@ -1,6 +1,7 @@
 package mwutils
 
 import (
+	"github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 	"net/http"
 	"sync"
 	"time"
@@ -16,6 +17,7 @@ var (
 )
 
 func MapperSet(val *Connection) {
+	nlog.Debugf("Setting %p", val.Request)
 	r := val.Request
 	mutex.Lock()
 	data[r] = val
@@ -25,6 +27,12 @@ func MapperSet(val *Connection) {
 
 // GetOk returns stored value and presence state like multi-value return of map access.
 func MapperGetOk(r *http.Request) (*Connection, bool) {
+	for k, d := range data {
+		nlog.Debugf("Getting fromXXXX KEY: %p, DATA:%+v", k, d)
+
+	}
+	nlog.Debugf("Getting for %p", r)
+
 	mutex.RLock()
 	value, ok := data[r]
 	mutex.RUnlock()
@@ -81,8 +89,8 @@ func MapperPurge(maxAge int) int {
 func ConnectionMapperFuncWrapper(f func(w http.ResponseWriter, r *http.Request)) func(con *Connection) {
 	return func(con *Connection) {
 		MapperSet(con)
-		defer MapperClear(con.Request)
 		f(con.ResponseWriter, con.Request)
+		defer MapperClear(con.Request)
 	}
 }
 

@@ -1,8 +1,8 @@
 package registry
 
 import (
-	"../mwutils"
-	log "../nlog"
+	"github.com/pchojnacki/intelligent_maybe_proxy/mwutils"
+	// log "github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 
 	"fmt"
 	"net/http"
@@ -12,10 +12,6 @@ import (
 
 func init() {
 	fmt.Println("")
-}
-
-type ExtendedInfo struct {
-	OriginalRequest *http.Request
 }
 
 type Info struct {
@@ -40,7 +36,6 @@ func (mainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// modify r url and cut out the matched pattern
 	trimPrefixFromURL(r.URL, pattern)
 
-	log.Debug("info")
 	h.ServeHTTP(w, r)
 }
 

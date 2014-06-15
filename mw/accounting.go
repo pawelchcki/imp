@@ -1,9 +1,8 @@
 package mw
 
 import (
-	"fmt"
 	// "github.com/garyburd/redigo/redis"
-	"../nlog"
+	"github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 	"net/http"
 	// "net/url"
 )
@@ -17,7 +16,7 @@ func init() {
 
 func waruj() {
 	for r := range commChannel {
-		fmt.Printf("%+v", r.request.URL)
+		nlog.Debugf("%+v", r.request.URL)
 		r.responseChan <- &initialCheckResponse{true}
 	}
 }
@@ -35,6 +34,6 @@ func VerifyToken(w http.ResponseWriter, r *http.Request) bool {
 	checkRequest := &initialCheckRequest{r, make(chan *initialCheckResponse)}
 	commChannel <- checkRequest
 	x := <-checkRequest.responseChan
-	fmt.Printf("%+v\n", x)
+	nlog.Debugf("%+v\n", x)
 	return x.authorized
 }

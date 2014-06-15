@@ -1,9 +1,12 @@
 package nlog
 
 import (
+	"fmt"
 	"log"
 	"log/syslog"
 	"os"
+	"path"
+	"runtime"
 )
 
 func init() {
@@ -30,12 +33,24 @@ func initializeStdOutLoggers() {
 	}
 }
 
+func getCallerInfo() []interface{} {
+	_, callerFilename, callerLineNumber, ok := runtime.Caller(3)
+	if !ok {
+		callerFilename = "UNKNOWN"
+		callerLineNumber = 0
+	}
+	ret := []interface{}{fmt.Sprintf("%-20s ", fmt.Sprintf("%s:%d", path.Base(callerFilename), callerLineNumber))}
+	return ret
+}
+
 func levelPrintf(prio syslog.Priority, f string, v ...interface{}) {
-	prioLoggers[prio].Printf(f, v...)
+	sv := append(getCallerInfo(), v...)
+	prioLoggers[prio].Printf("%s"+f, sv...)
 }
 
 func levelPrint(prio syslog.Priority, v ...interface{}) {
-	prioLoggers[prio].Print(v...)
+	sv := append(getCallerInfo(), v...)
+	prioLoggers[prio].Print(sv...)
 }
 
 func Emerg(v ...interface{}) {
@@ -56,6 +71,7 @@ func Warning(v ...interface{}) {
 func Notice(v ...interface{}) {
 	levelPrint(syslog.LOG_NOTICE, v...)
 }
+
 func Info(v ...interface{}) {
 	levelPrint(syslog.LOG_INFO, v...)
 }

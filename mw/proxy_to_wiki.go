@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"../mwutils"
-	"../nlog"
+	"github.com/pchojnacki/intelligent_maybe_proxy/mwutils"
+	"github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 )
 
 const DefaultWikiaName = "www"
@@ -35,6 +35,7 @@ func defaultWikiBaseUrl(wikiaName, wikiaLang string) *url.URL {
 	} else {
 		u.Host = wikiaName + "." + baseHost
 	}
+	nlog.Debugf("+v%", u)
 	return u
 }
 

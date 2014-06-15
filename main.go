@@ -1,11 +1,11 @@
 package main
 
 import (
-	"./registry"
+	"github.com/pchojnacki/intelligent_maybe_proxy/registry"
 
-	_ "./handlers"
-	log "./nlog"
 	"fmt"
+	_ "github.com/pchojnacki/intelligent_maybe_proxy/handlers"
+	log "github.com/pchojnacki/intelligent_maybe_proxy/nlog"
 	"net/http"
 	// "net/http/httputil"
 	// "net/url"

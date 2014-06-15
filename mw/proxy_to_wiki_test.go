@@ -1,11 +1,10 @@
 package mw
 
 import (
-	// "io/ioutil"
-	// // "fmt"
-
-	"../mwutils"
+	"github.com/pchojnacki/intelligent_maybe_proxy/mwutils"
 	"net/http"
+	// "net/http/httputil"
+
 	"net/url"
 	"testing"
 )
